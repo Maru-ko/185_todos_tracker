@@ -18,42 +18,25 @@ class DatabasePersistence
 
 
   def find_list(id)
-    sql =<<~SQL
-      SELECT l.*,
-        COUNT(t.id) AS todos_count,
-        COUNT(NULLIF(t.completed, true)) AS todos_remaining_count
-        FROM lists l
-        LEFT OUTER JOIN todos t ON t.list_id = l.id
-        WHERE l.id = $1
-        GROUP BY l.id
-        ORDER BY l.name;
-    SQL
+    sql = "SELECT * FROM lists WHERE id = $1"
     result = query(sql, id)
-    tuple = result.first#.find_todos_for_list
-    # list_id = tuple["id"].to_i
-    # todos = find_todos_for_list(list_id)
-    { id: tuple["id"].to_i,
-      name: tuple["name"], 
-      todos_count: tuple["todos_count"].to_i,
-      todos_remaining_count: tuple["todos_remaining_count"].to_i }
+
+    tuple = result.first
+
+    list_id = tuple["id"].to_i
+    todos = find_todos_for_list(list_id)
+    {id: list_id, name: tuple["name"] , todos: todos}
   end
 
   def all_lists
-    sql = <<~SQL
-      SELECT l.*,
-        COUNT(t.id) AS todos_count,
-        COUNT(NULLIF(t.completed, true)) AS todos_remaining_count
-        FROM lists l
-        LEFT OUTER JOIN todos t ON t.list_id = l.id
-        GROUP BY l.id ORDER BY l.name
-    SQL
+    sql = "SELECT * FROM  lists"
     result = query(sql)
 
     result.map do |tuple|
-     { id: tuple["id"].to_i,
-       name: tuple["name"],
-       todos_count: tuple["todos_count"].to_i,
-       todos_remaining: tuple["todos_remaining"].to_i }
+      list_id = tuple["id"].to_i
+      
+      todos = find_todos_for_list(list_id)
+      {id: list_id, name: tuple["name"] , todos: todos}
     end
   end
 
@@ -69,15 +52,11 @@ class DatabasePersistence
   end
 
   def create_new_list(list_name)
-    sql = "INSERT INTO lists (name) VALUES ($1)"
-    query(sql, list_name)
       # id = next_element_id(@session[:lists])
       # @session[:lists] << { id: id, name: list_name, todos: [] }
   end
 
   def delete_list(id)
-    query("DELETE FROM todos WHERE list_id = $1", id)
-    query("DELETE FROM lists WHERE id = $1", id)
       # @session[:lists].reject! { |list| list[:id] == id }
   end
 
