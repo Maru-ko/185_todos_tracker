@@ -15,9 +15,9 @@ configure(:development) do
   also_reload "database_persistence.rb" if development?
 end
 
-after do
-  @storage.disconnect
-end
+# after do
+#   @storage.disconnect
+# end
 
 def disconnect
   @db.close
