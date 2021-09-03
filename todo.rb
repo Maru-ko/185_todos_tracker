@@ -19,9 +19,9 @@ end
 #   @storage.disconnect
 # end
 
-# def disconnect
-#   @db.close
-# end
+def disconnect
+  @db.close
+end
 
 helpers do
   def list_complete?(list)
